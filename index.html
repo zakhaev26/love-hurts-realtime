@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+
+<body>
+	<h1>Real Time Database !</h1>
+	<input id='crush' type="text" placeholder="Enter Your Crush's Name that would be stored in Db">
+	<button id="submit">Submit</button>
+
+	<div id="crushes"></div>
+	
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+
+		const crushContainer = document.getElementById('crushes');
+		const crushBox = document.getElementById('crush');
+		const btn = document.getElementById('submit');
+		
+		let arr = [];
+
+		fetch("http://localhost:3400/all",{
+			method:"GET"
+		}).then((response)=>{
+			return response.json();
+		}).then((data)=>{
+			console.log(data);
+			data.map((name,id)=>{
+				const cname = document.createElement("h1");
+				cname.innerText = name.crushName;
+				crushContainer.appendChild(cname);
+			})	
+		})
+
+		btn.addEventListener('click',async () => {
+			try{
+				const crush = crushBox.value
+				console.log("C = " , crush)
+				await fetch("http://localhost:3400/api", {
+				method: 'POST', 
+				headers: {
+					'Content-Type': 'application/json' 
+				},
+				body:
+					JSON.stringify({crush}),
+			}).then(()=>alert("posted"));
+			}catch(e){
+				alert(e.message);
+			}
+		})
+		const socket = io('http://localhost:3400');
+		socket.on('crushTime', (data) => {
+			console.log('Crush : ', data);
+			const cname = document.createElement("h1");
+			cname.innerText = data.crushName;
+			crushContainer.appendChild(cname);
+		});
+	</script>
+</body>
+
+</html>
